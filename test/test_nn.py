@@ -20,6 +20,9 @@ import torch
 # NN tests use double as the default dtype
 torch.set_default_dtype(torch.double)
 
+# TODO(alband) Remove this when this flag is not needed anymore
+torch._C._set_forward_AD_enabled(True)
+
 from torch._six import inf, nan
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
@@ -2873,7 +2876,8 @@ class TestNN(NNTestCase):
                     def fn(weight):
                         return wrapped_m(input)
 
-                    torch.autograd.gradcheck(fn, (m.weight_orig,))
+                    # The input is not actually used and so forward ad check will fail
+                    torch.autograd.gradcheck(fn, (m.weight_orig,), check_forward=False)
 
     @skipIfNoLapack
     def test_spectral_norm_load_state_dict(self):
